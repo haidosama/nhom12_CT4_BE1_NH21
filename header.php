@@ -1,11 +1,18 @@
 <?php
-require "config.php";
-require "models/db.php";
-require "models/product.php";
+session_start();
+
+require("config.php");
+require("models/db.php");
+require("models/product.php");
+
 $product = new Product;
 $getAllProducts = $product->getAllProducts();
-$getNewProducts = $product->getNewProducts();
-//var_dump($getAllProducts);
+$getnewProducts = $product->getnewProducts();
+$gettopSellingRow1 = $product->gettopSellingRow1();
+$gettopSellingRow2 = $product->gettopSellingRow2();
+$gettopSellingRow3 = $product->gettopSellingRow3();
+$gettopSellingLaptop = $product->gettopSellingLaptop();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +23,7 @@ $getNewProducts = $product->getNewProducts();
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-	<title>Electro - HTML Ecommerce Template</title>
+	<title>Electro Shop</title>
 
 	<!-- Google font -->
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
@@ -57,10 +64,45 @@ $getNewProducts = $product->getNewProducts();
 					<li><a href="#"><i class="fa fa-envelope-o"></i> email@email.com</a></li>
 					<li><a href="#"><i class="fa fa-map-marker"></i> 1734 Stonecoal Road</a></li>
 				</ul>
-				<ul class="header-links pull-right">
-					<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
-					<li><a href="#"><i class="fa fa-user-o"></i> My Account</a></li>
-				</ul>
+
+				<!-- LOGIN -->
+					<!-- Nếu chưa login sẽ hiện My account để người dùng đăng nhập -->
+					<ul class="header-links pull-right">
+
+						<?php if (!isset($_SESSION["username"])) { ?>
+							<li><a href="?login"><i class="fa fa-user-o"> My Account</i></a></li>
+
+							<?php if (isset($_GET["login"])) : ?>
+								<form action="login.php" method="get">
+									<div>
+										<input type="text" name="username" placeholder="Username">
+									</div>
+									<div>
+										<input type="password" name="password" placeholder="Password">
+									</div>
+									<div>
+										<button type="submit" name="btn_submit"><a>Login</a></button>
+										<button><a href="register.php">Register</a></button>
+									</div>
+								</form>
+							<?php endif ?>
+					</ul>
+					<!-- /Nếu chưa login sẽ hiện My account để người dùng đăng nhập -->
+
+					<!-- Đã đăng nhập -->
+					<?php } else { ?>
+						<ul class="header-links pull-right">
+							<li><a><i class="fa fa-user-o"> <?php echo $_SESSION["username"] ?></i></a></li>
+
+							<!-- chức năng kiểm tra và hiển thị số dư tài khoản -->
+							<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
+							<!-- /chức năng kiểm tra và hiển thị số dư tài khoản -->
+
+							<li><a href="logout.php">Log out</a></li>
+						</ul>
+					<?php } ?>
+					<!--/ Đã đăng nhập -->
+				<!-- /LOGIN -->
 			</div>
 		</div>
 		<!-- /TOP HEADER -->
@@ -74,7 +116,7 @@ $getNewProducts = $product->getNewProducts();
 					<!-- LOGO -->
 					<div class="col-md-3">
 						<div class="header-logo">
-							<a href="#" class="logo">
+							<a href="index.php" class="logo">
 								<img src="./img/logo.png" alt="">
 							</a>
 						</div>
@@ -92,78 +134,81 @@ $getNewProducts = $product->getNewProducts();
 								</select>
 								<input class="input" placeholder="Search here" name="keyword">
 								<button type="submit" class="search-btn">Search</button>
+
 							</form>
 						</div>
 					</div>
 					<!-- /SEARCH BAR -->
 
-					<!-- ACCOUNT -->
-					<div class="col-md-3 clearfix">
-						<div class="header-ctn">
-							<!-- Wishlist -->
-							<div>
-								<a href="#">
-									<i class="fa fa-heart-o"></i>
-									<span>Your Wishlist</span>
-									<div class="qty">2</div>
-								</a>
-							</div>
-							<!-- /Wishlist -->
+					<?php if (isset($_SESSION["username"])) : ?>
+						<!-- ACCOUNT -->
+						<div class="col-md-3 clearfix">
+							<div class="header-ctn">
+								<!-- Wishlist -->
+								<div>
+									<a href="#">
+										<i class="fa fa-heart-o"></i>
+										<span>Your Wishlist</span>
+										<div class="qty">2</div>
+									</a>
+								</div>
+								<!-- /Wishlist -->
 
-							<!-- Cart -->
-							<div class="dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-									<i class="fa fa-shopping-cart"></i>
-									<span>Your Cart</span>
-									<div class="qty">3</div>
-								</a>
-								<div class="cart-dropdown">
-									<div class="cart-list">
-										<div class="product-widget">
-											<div class="product-img">
-												<img src="./img/product01.png" alt="">
+								<!-- Cart -->
+								<div class="dropdown">
+									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+										<i class="fa fa-shopping-cart"></i>
+										<span>Your Cart</span>
+										<div class="qty">3</div>
+									</a>
+									<div class="cart-dropdown">
+										<div class="cart-list">
+											<div class="product-widget">
+												<div class="product-img">
+													<img src="./img/product01.png" alt="">
+												</div>
+												<div class="product-body">
+													<h3 class="product-name"><a href="#">product name goes here</a></h3>
+													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+												</div>
+												<button class="delete"><i class="fa fa-close"></i></button>
 											</div>
-											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
-											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
-										</div>
 
-										<div class="product-widget">
-											<div class="product-img">
-												<img src="./img/product02.png" alt="">
+											<div class="product-widget">
+												<div class="product-img">
+													<img src="./img/product02.png" alt="">
+												</div>
+												<div class="product-body">
+													<h3 class="product-name"><a href="#">product name goes here</a></h3>
+													<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
+												</div>
+												<button class="delete"><i class="fa fa-close"></i></button>
 											</div>
-											<div class="product-body">
-												<h3 class="product-name"><a href="#">product name goes here</a></h3>
-												<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
-											</div>
-											<button class="delete"><i class="fa fa-close"></i></button>
 										</div>
-									</div>
-									<div class="cart-summary">
-										<small>3 Item(s) selected</small>
-										<h5>SUBTOTAL: $2940.00</h5>
-									</div>
-									<div class="cart-btns">
-										<a href="#">View Cart</a>
-										<a href="#">Checkout <i class="fa fa-arrow-circle-right"></i></a>
+										<div class="cart-summary">
+											<small>3 Item(s) selected</small>
+											<h5>SUBTOTAL: $2940.00</h5>
+										</div>
+										<div class="cart-btns">
+											<a href="#">View Cart</a>
+											<a href="#">Checkout <i class="fa fa-arrow-circle-right"></i></a>
+										</div>
 									</div>
 								</div>
-							</div>
-							<!-- /Cart -->
+								<!-- /Cart -->
 
-							<!-- Menu Toogle -->
-							<div class="menu-toggle">
-								<a href="#">
-									<i class="fa fa-bars"></i>
-									<span>Menu</span>
-								</a>
+								<!-- Menu Toogle -->
+								<div class="menu-toggle">
+									<a href="#">
+										<i class="fa fa-bars"></i>
+										<span>Menu</span>
+									</a>
+								</div>
+								<!-- /Menu Toogle -->
 							</div>
-							<!-- /Menu Toogle -->
 						</div>
-					</div>
-					<!-- /ACCOUNT -->
+						<!-- /ACCOUNT -->
+					<?php endif ?>
 				</div>
 				<!-- row -->
 			</div>
@@ -181,12 +226,11 @@ $getNewProducts = $product->getNewProducts();
 			<div id="responsive-nav">
 				<!-- NAV -->
 				<ul class="main-nav nav navbar-nav">
-					<li class="active"><a href="#">Home</a></li>
+					<li class="active"><a href="index.php">Home</a></li>
 					<li><a href="#">Hot Deals</a></li>
-					<li><a href="#">Categories</a></li>
 					<li><a href="#">Laptops</a></li>
 					<li><a href="#">Smartphones</a></li>
-					<li><a href="#">Cameras</a></li>
+					<li><a href="#">Camera</a></li>
 					<li><a href="#">Accessories</a></li>
 				</ul>
 				<!-- /NAV -->
